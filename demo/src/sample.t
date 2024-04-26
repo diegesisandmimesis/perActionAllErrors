@@ -21,29 +21,47 @@
 
 #include "perActionAllErrors.h"
 
-versionInfo: GameID
-        name = 'perActionAllErrors Library Demo Game'
-        byline = 'Diegesis & Mimesis'
-        desc = 'Demo game for the perActionAllErrors library. '
-        version = '1.0'
-        IFID = '12345'
-	showAbout() {
-		"This is a simple test game that demonstrates the features
-		of the perActionAllErrors library.
-		<.p>
-		Consult the README.txt document distributed with the library
-		source for a quick summary of how to use the library in your
-		own games.
-		<.p>
-		The library source is also extensively commented in a way
-		intended to make it as readable as possible. ";
-	}
-;
+versionInfo: GameID;
 gameMain: GameMainDef
 	initialPlayerChar = me
-	inlineCommand(cmd) { "<b>&gt;<<toString(cmd).toUpper()>></b>"; }
-	printCommand(cmd) { "<.p>\n\t<<inlineCommand(cmd)>><.p> "; }
+	allVerbsAllowAll = nil
 ;
 
-startRoom: Room 'Void' "This is a featureless void.";
+southRoom: Room 'South Room'
+	"This is the south room.  There's another room north of here. "
+	north = northRoom
+;
 +me: Person;
+
+northRoom: Room 'North Room'
+	"This is the north room.  The south room is, unsurprisingly, south
+	of here. "
+	south = southRoom
+;
++pebble: Thing '(small) (round) pebble' 'pebble'
+	"A small, round pebble. "
+;
+
+modify playerMessages
+	cantSmellAll(actor) {
+		"<.parser>{You/He} can only smell one thing at a
+		time.<./parser> ";
+	}
+	nothingToTake(actor) {
+		"<.parser>{You/He} can't indulge {your/his} kleptomaniacal
+		tendencies at the moment because there's nothing to take. ";
+	}
+	nothingElseToTake(actor) {
+		"<.parser>{You/He} {has} managed to talk {yourself} out
+		of taking anything. ";
+	}
+;
+
+modify SmellAction
+	allNotAllowedMsg = &cantSmellAll
+;
+
+modify TakeAction
+	noMatchForAllMsg = &nothingToTake
+	noMatchForAllButMsg = &nothingElseToTake
+;
