@@ -11,21 +11,33 @@
 //	To define custom failure messages on an action, use the following
 //	properties:
 //
-//		allNotAllowedMsg
+//		allNotAllowedMsg	actor
 //			Used if "all" is used with the action and the
 //			action/game doesn't allow "all".
 //
-//		noMatchForAllMsg
+//		noMatchForAllMsg	actor
 //			Used if "all" is used with the action and no matching
 //			objects are in scope.
 //
-//		noMatchForAllButMsg
+//		noMatchForAllButMsg	actor
 //			Used if "all" with exceptions is used with the action
 //			and no objects are left after the exceptions are
 //			excluded.
 //
+//		uniqueObjectRequired	actor, txt, matchList
+//			Used if the action only accepts a single object
+//			and the noun phrase matches more than one (example:
+//			>KICK WALLS will usually match the four default
+//			walls).
+//
+//		singleObjectRequired	actor, txt
+//			Used if the action only accepts a single object and
+//			the noun phrase was a list (example: >KICK ME, FLOOR).
+//
 //	The value assigned to the property should be a property reference
 //	for the actor's parser message object (playerMessages or npcMessages).
+//	The message property should be a method that accepts the listed
+//	arguments and outputs a double-quoted string.
 //
 //
 // EXAMPLE:
@@ -63,69 +75,6 @@ modify Action
 	allNotAllowedMsg = nil
 	noMatchForAllMsg = nil
 	noMatchForAllButMsg = nil
-;
-
-modify EverythingProd
-	resolveNouns(resolver, results) {
-		local lst;
-
-		if(!resolver.allowAll()) {
-			results.allNotAllowed(resolver.action_);
-			return([]);
-		}
-		lst = resolver.getAll(self);
-		lst.forEach(function(o) {
-			o.flags_ |= AlwaysAnnounce | MatchedAll;
-		});
-		if(lst.length == 0)
-			results.noMatchForAll(resolver.action_);
-
-		return(lst);
-	}
-;
-
-modify EverythingButProd
-	flagAllExcepted(resolver, results) {
-		results.noMatchForAllBut(resolver.action_);
-	}
-;
-
-modify BasicResolveResults
-	allNotAllowed(action?) {
-		if(action && (action.propType(&allNotAllowedMsg) != TypeNil))
-			throw new ParseFailureException(
-				action.allNotAllowedMsg);
-		else
-			inherited();
-	}
-
-	noMatchForAll(action?) {
-		if(action && (action.propType(&noMatchForAllMsg) != TypeNil))
-			throw new ParseFailureException(
-				action.noMatchForAllMsg);
-		else
-			inherited();
-	}
-
-	noMatchForAllBut(action?) {
-		if(action && (action.propType(&noMatchForAllButMsg) != TypeNil))
-			throw new ParseFailureException(
-				action.noMatchForAllButMsg);
-		else
-			inherited();
-	}
-;
-
-// Modify the subclasses to have the same usage for allNotAllowed().
-modify TryAsActorResolveResults
-	allNotAllowed(action?) { inherited(); }
-	noMatchForAll(action?) { inherited(); }
-	noMatchForAllBut(action?) { inherited(); }
-	noMatchForListBut(action?) { inherited(); }
-;
-modify CommandRanking
-	allNotAllowed(action?) { inherited(); }
-	noMatchForAll(action?) { inherited(); }
-	noMatchForAllBut(action?) { inherited(); }
-	noMatchForListBut(action?) { inherited(); }
+	uniqueObjectRequiredMsg = nil
+	singleObjectRequiredMsg = nil
 ;

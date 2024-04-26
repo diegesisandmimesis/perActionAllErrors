@@ -24,7 +24,21 @@
 versionInfo: GameID;
 gameMain: GameMainDef
 	initialPlayerChar = me
-	allVerbsAllowAll = nil
+	//allVerbsAllowAll = nil
+	inlineCommand(cmd) { "<b>&gt;<<toString(cmd).toUpper()>></b>"; }
+	printCommand(cmd) { "\n\t<<inlineCommand(cmd)>> "; }
+
+	showIntro() {
+		"Actions to try:\n ";
+		"<<printCommand('take all')>> ";
+		"<<printCommand('smell all')>> ";
+		"<<printCommand('kick walls')>> ";
+		"<<printCommand('kick me, floor')>> ";
+		"<.p> ";
+		"\nIn the room to the north (with the pebble): ";
+		"<<printCommand('take all but pebble')>> ";
+		"<.p> ";
+	}
 ;
 
 southRoom: Room 'South Room'
@@ -55,13 +69,27 @@ modify playerMessages
 		"<.parser>{You/He} {has} managed to talk {yourself} out
 		of taking anything. ";
 	}
+	cantAttackMulti(actor, txt, matchList) {
+		"<.parser>Belligerent as {you/he} {are}, {you/he} can still
+		only attack one thing at a time.<./parser> ";
+	}
+	cantAttackList(actor, txt) {
+		"<.parser>That's a list.  {You/He} can't attack a
+		list!<./parser> ";
+	}
 ;
 
 modify SmellAction
 	allNotAllowedMsg = &cantSmellAll
+	actionAllowsAll = nil
 ;
 
 modify TakeAction
 	noMatchForAllMsg = &nothingToTake
 	noMatchForAllButMsg = &nothingElseToTake
+;
+
+modify AttackAction
+	uniqueObjectRequiredMsg = &cantAttackMulti
+	singleObjectRequiredMsg = &cantAttackList
 ;
